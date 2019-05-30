@@ -4,8 +4,12 @@
 #include <sys/wait.h>
 #include <string.h>
 #include <errno.h>
+#include <signal.h>
 
 #define MAX_SIZE 1024
+
+void handler(int sig) {
+}
 
 char *cmd1[MAX_SIZE];
 
@@ -22,6 +26,10 @@ int main(int argc, char* argv[]) {
     command[strlen(buf) - 1] = '\0';
     if(strcmp(command, "quit") == 0)
       exit(0);
+    if(signal(SIGINT, handler) == SIG_ERR) { //so ^C won't work
+      fprintf(stderr, "Unable to use %s\n", strerror(errno));
+      return EXIT_FAILURE;
+    }
     char *token = strtok(command, " ");
     while(token != NULL) {
       cmd1[i++] = token;
@@ -50,6 +58,7 @@ int main(int argc, char* argv[]) {
       printf("%s: cannot wait for child\n", argv[0]);
       return EXIT_FAILURE;
     }
+    memset(cmd1, 0, sizeof(cmd1));
   }
   return EXIT_SUCCESS;
 }
